@@ -1,35 +1,58 @@
 # Architectural Decisions
 
-## Sprint 1: Stack Selection
+## Sprint 1: Runtime and Stack Selection
 
-**Decision:** Python 3.11+, FastAPI, Pydantic V2, pytest.
+### The Question
+The language was never the decision. The decision was: **how many runtimes do we operate for one HTTP endpoint, and who has to be able to fix it at 2am?**
 
-**Context:** We are building the backend spine for a mobility intelligence platform. This service will ingest wearable telemetry, validate it, and pass it to analytics to generate clinical insights. 
+### The Axis
+We are building a single-endpoint ML scoring service. The scoring libraries (biomechanics, signal processing, ML inference) are Python-native. The question is whether we:
+- (A) Run one Python runtime that handles both HTTP and scoring
+- (B) Split into two runtimes (e.g., Go for HTTP, Python for scoring)
 
-**Rationale:** 
-- Python is the native language of the ML/biomechanics ecosystem.
-- FastAPI provides the async throughput needed for high-volume wearable data ingestion.
-- Pydantic enforces strict physical and logical boundaries on clinical data at the API edge.
+### The Decision
+**One Python runtime (FastAPI).** We operate one deployable, one runtime, one team fixes it at 2am.
 
-**Rejected Alternatives:**
-- Node.js/Express: Lacks native ML/data-science libraries.
-- Go: Lacks native ML libraries; too much boilerplate for a rapid MVP spine.
-- Django: Too heavy. We don't need an ORM or admin panel for a pure API service.
+### Rejected Alternatives (with concrete costs)
+
+**Go for HTTP + Python sidecar for scoring:**
+- *Gains:* Static binary, trivial deploys, better cold start, lower memory per instance.
+- *Costs:* Two deployables, two runtimes, a new failure mode between them (network/serialization overhead), two codebases to maintain, two sets of dependencies to patch.
+- *Verdict:* We'd pay operational complexity to avoid Python's cold start. Not worth it for one endpoint.
+
+**Node.js for HTTP + Python sidecar:**
+- *Gains:* Same as Go (static binary, fast cold start).
+- *Costs:* Same as Go (two runtimes, two deployables). Plus, Node's ML ecosystem is weaker than Python's, so we'd still need the Python sidecar.
+- *Verdict:* Same tradeoff as Go, no additional benefit.
+
+**Django instead of FastAPI:**
+- *Gains:* Built-in admin panel, ORM, templating.
+- *Costs:* Heavy framework for a pure API service. We don't need a database ORM, admin panel, or HTML templates. We'd be shipping and maintaining code we don't use.
+- *Verdict:* Over-engineered for this use case.
+
 **Flask instead of FastAPI:**
-- *Gains:* Mature, simpler, Flask 2.0+ supports async views.
-- *Costs:* Lacks native Pydantic integration and automatic OpenAPI documentation. For a validation-heavy ML service with strict clinical data boundaries, Flask would require additional libraries (pydantic-flask, flask-swagger) and more boilerplate to achieve equivalent schema enforcement and API documentation.
-- *Verdict:* FastAPI's built-in validation and docs reduce enforcement gaps and setup time for this use case.
-- 
-- ## ML Service Rationale
+- *Gains:* Simpler, more mature.
+- *Costs:* Lacks native async. Wearable telemetry ingestion will need async throughput as we scale. Flask would block on I/O.
+- *Verdict:* Would require re-architecture when we hit scale.
 
-**Why Python + FastAPI for ML specifically:**
+### What This Choice Cost Us
+The Python mono-stack buys us one runtime and one deployable. It costs us:
+- **Slower cold start** (Python is slower to boot than Go/Node)
+- **Higher memory per instance** (Python's runtime is heavier)
+- **API and model code share the same deploy cadence** (if the model code breaks, the API goes down too)
 
-1. **Model Integration Path:** Our analytics layer will eventually load trained ML models (scikit-learn, PyTorch, or similar). Python is the only language with native support for these frameworks. Using any other language would require complex bridging layers.
+### What Flips the Call
+This is right **while scoring is one endpoint owned by one team.** The moment:
+- A second model needs a different runtime (e.g., Rust for ultra-low-latency inference)
+- Scoring latency starts competing with API latency under load (e.g., model inference takes 500ms and blocks the HTTP thread)
+- The API team and ML team become separate teams with different deploy cadences
 
-2. **Data Science Ecosystem:** Wearable telemetry analysis requires signal processing (SciPy), numerical computation (NumPy), and data manipulation (Pandas). These are all Python-native. Building in another language would mean reimplementing or wrapping these tools.
+...the mono-stack stops being right and we split the service.
 
-3. **Schema Validation for Clinical Data:** Pydantic enforces physical boundaries (e.g., stride length must be positive, gait symmetry must be 0-1). This prevents invalid data from reaching the ML models, which is critical for reliable predictions.
+### How We'll Know Early If We're Wrong
+The whole call rests on "one team operates everything." If in the first month:
+- The API team keeps having to touch model code to deploy API changes
+- Model experiments are blocked by API release cycles
+- We're spending more than 20% of sprint time on deploy coordination between "API" and "model" code
 
-4. **Async Throughput for Telemetry:** Wearable devices generate high-volume time-series data. FastAPI's async capabilities allow us to handle concurrent data ingestion efficiently, which is essential when scaling from one patient to hundreds.
-
-5. **Rapid Iteration:** ML workflows require frequent experimentation with features and models. Python's simplicity and FastAPI's minimal boilerplate allow us to iterate quickly without being blocked by language complexity.
+...that premise is already breaking and we need to revisit the decision.
