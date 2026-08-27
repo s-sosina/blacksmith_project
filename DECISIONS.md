@@ -15,7 +15,10 @@
 - Node.js/Express: Lacks native ML/data-science libraries.
 - Go: Lacks native ML libraries; too much boilerplate for a rapid MVP spine.
 - Django: Too heavy. We don't need an ORM or admin panel for a pure API service.
-- Flask: Lacks native async, which we need for scaling wearable ingestion.
+**Flask instead of FastAPI:**
+- *Gains:* Mature, simpler, Flask 2.0+ supports async views.
+- *Costs:* Lacks native Pydantic integration and automatic OpenAPI documentation. For a validation-heavy ML service with strict clinical data boundaries, Flask would require additional libraries (pydantic-flask, flask-swagger) and more boilerplate to achieve equivalent schema enforcement and API documentation.
+- *Verdict:* FastAPI's built-in validation and docs reduce enforcement gaps and setup time for this use case.
 - 
 - ## ML Service Rationale
 
