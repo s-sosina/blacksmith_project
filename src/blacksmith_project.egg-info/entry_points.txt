@@ -1,0 +1,2 @@
+[console_scripts]
+blacksmith-service = src.app.__main__:main
