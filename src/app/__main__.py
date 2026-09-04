@@ -2,7 +2,6 @@
 Entry point for the blacksmith service.
 """
 import os
-import socket
 import sys
 import uvicorn
 from src.app.main import app
@@ -20,34 +19,25 @@ def get_port() -> int:
         print("PORT must be an integer between 1 and 65535")
         sys.exit(1)
 
-def is_port_available(port: int) -> bool:
-    """Check if a port is available for binding."""
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        try:
-            s.bind(("0.0.0.0", port))
-            return True
-        except OSError:
-            return False
-
 def main() -> None:
     """Main entry point for the service."""
     port = get_port()
-    
-    if not is_port_available(port):
-        print(f"Error: Port {port} is already in use.")
-        print("Please free up the port or specify a different one using the PORT environment variable.")
-        sys.exit(1)
-    
+
     print(f"Starting blacksmith service on port {port}...")
     print(f"Health check available at: http://localhost:{port}/health")
     print(f"API documentation available at: http://localhost:{port}/docs")
-    
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=port,
-        log_level="info"
-    )
+
+    try:
+        uvicorn.run(
+            app,
+            host="0.0.0.0",
+            port=port,
+            log_level="info",
+        )
+    except OSError:
+        print(f"Error: Port {port} is already in use.")
+        print("Please free up the port or specify a different one using the PORT environment variable.")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()

@@ -18,6 +18,12 @@ dependencies = [
     "pydantic>=2.5.0"
 ]
 
+[project.optional-dependencies]
+dev = [
+    "httpx>=0.25.0",
+    "pytest>=7.0",
+]
+
 [project.scripts]
 blacksmith-service = "src.app.__main__:main"
 

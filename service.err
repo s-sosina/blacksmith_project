@@ -1,4 +1,0 @@
-Traceback (most recent call last):
-  File "C:\Users\HP\Documents\blacksmith_project\src\app\__main__.py", line 8, in <module>
-    from src.app.main import app
-ModuleNotFoundError: No module named 'src'
