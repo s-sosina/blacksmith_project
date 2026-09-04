@@ -8,6 +8,8 @@ This service processes wearable telemetry data and generates mobility insights.
 ## Quick Start
 
 ### Installation
+Creates a local virtual environment (`.venv`) and installs runtime plus dev dependencies. This avoids writing to the system Python, which modern Linux distributions restrict by default.
+
 ```bash
 make install
 ```
