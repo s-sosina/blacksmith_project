@@ -1,5 +1,5 @@
-from app.schemas import WearableTelemetry
-from app.analytics import generate_mobility_insight
+from mobility_intelligence.schemas import WearableTelemetry
+from mobility_intelligence.analytics import generate_mobility_insight
 from datetime import datetime
 
 # This is a "test function". Pytest will find it because it starts with "test_"

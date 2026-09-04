@@ -5,7 +5,7 @@ import os
 import socket
 import sys
 import uvicorn
-from app.main import app
+from mobility_intelligence.main import app
 
 def get_port() -> int:
     """Get port from environment variable with default fallback."""
