@@ -5,7 +5,7 @@ import os
 import socket
 import sys
 import uvicorn
-from src.app.main import app
+from app.main import app
 
 def get_port() -> int:
     """Get port from environment variable with default fallback."""
@@ -41,7 +41,7 @@ def main() -> None:
     print(f"API documentation available at: http://localhost:{port}/docs")
 
     sock = bind_socket(port)
-    config = uvicorn.Config(app, log_level="info")
+    config = uvicorn.Config(app, host="0.0.0.0", port=port, log_level="info")
     server = uvicorn.Server(config)
     server.run(sockets=[sock])
 

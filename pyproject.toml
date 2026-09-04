@@ -25,7 +25,7 @@ dev = [
 ]
 
 [project.scripts]
-blacksmith-service = "src.app.__main__:main"
+blacksmith-service = "app.__main__:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
