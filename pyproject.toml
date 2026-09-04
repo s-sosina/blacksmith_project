@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "blacksmith_project"
+version = "0.1.0"
+description = "Wearable Telemetry API Service"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Blacksmith Team"}
+]
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "pydantic>=2.5.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "httpx>=0.25.0",
+    "pytest>=7.0",
+]
+
+[project.scripts]
+blacksmith-service = "mobility_intelligence.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
