@@ -27,3 +27,11 @@ def test_message_endpoint_rejects_empty_message():
 
     assert response.status_code == 400
     assert response.json()["detail"] == "Message is required"
+
+
+def test_message_endpoint_rejects_missing_body():
+    # No json= at all -> no request body, not just an empty dict.
+    response = client.post("/api/v1/messages")
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Message is required"

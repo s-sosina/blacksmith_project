@@ -7,7 +7,7 @@ name = "blacksmith_project"
 version = "0.1.0"
 description = "Minimal message processing API service"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
     {name = "Blacksmith Team"}
@@ -29,3 +29,7 @@ blacksmith-service = "blacksmith_service.__main__:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = [".git", "*.egg-info", ".venv"]
