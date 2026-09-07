@@ -30,6 +30,7 @@ test: $(STAMP)
 	$(PYTHON) -m pytest tests/ -v
 
 clean:
-	rm -rf build/ dist/ *.egg-info $(VENV)
+	rm -rf build/ dist/ *.egg-info $(VENV) venv/
 	find . -type d -name __pycache__ -exec rm -rf {} +
 	find . -type f -name '*.pyc' -delete
+	find . -type d -name '*.egg-info' -exec rm -rf {} +

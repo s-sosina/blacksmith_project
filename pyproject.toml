@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "blacksmith_project"
 version = "0.1.0"
-description = "Wearable Telemetry API Service"
+description = "Minimal message processing API service"
 readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
@@ -25,7 +25,7 @@ dev = [
 ]
 
 [project.scripts]
-blacksmith-service = "mobility_intelligence.__main__:main"
+blacksmith-service = "blacksmith_service.__main__:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

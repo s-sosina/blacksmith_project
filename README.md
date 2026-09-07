@@ -1,9 +1,9 @@
 # blacksmith_project
 
-Wearable Telemetry API Service
+Message Processing API Service
 
 ## Overview
-This service processes wearable telemetry data and generates mobility insights.
+This service accepts a short text message and returns it back with a processed confirmation.
 
 ## Quick Start
 

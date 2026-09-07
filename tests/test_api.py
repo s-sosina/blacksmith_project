@@ -1,24 +1,29 @@
 from fastapi.testclient import TestClient
 
-from mobility_intelligence.main import app
+from blacksmith_service.main import app
 
 client = TestClient(app)
 
 
-def test_mobility_insights_endpoint():
-    data = {
-        "patient_id": "pt_12345",
-        "timestamp": "2026-08-26T10:00:00Z",
-        "stride_length_cm": 65.5,
-        "gait_symmetry": 0.65,
-        "daily_active_minutes": 45,
-    }
-
-    response = client.post("/api/v1/mobility-insights", json=data)
+def test_message_endpoint_echoes_and_confirms():
+    response = client.post("/api/v1/messages", json={"message": "hello"})
 
     assert response.status_code == 200
     body = response.json()
-    assert body["patient_id"] == "pt_12345"
-    assert body["risk_flag"] == "alert"
-    assert "mobility_score" in body
-    assert "clinician_summary" in body
+    assert body["message"] == "hello"
+    assert body["processed"] is True
+    assert body["status"] == "received"
+
+
+def test_message_endpoint_rejects_missing_message():
+    response = client.post("/api/v1/messages", json={})
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Message is required"
+
+
+def test_message_endpoint_rejects_empty_message():
+    response = client.post("/api/v1/messages", json={"message": ""})
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Message is required"
