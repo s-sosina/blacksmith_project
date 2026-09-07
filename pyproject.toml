@@ -29,3 +29,7 @@ blacksmith-service = "blacksmith_service.__main__:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = ["archive", ".git", "*.egg-info", ".venv"]
